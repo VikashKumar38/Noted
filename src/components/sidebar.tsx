@@ -1,7 +1,11 @@
 import { Folders } from "../Folders";
 import { Recents } from "./Recents";
 
-const SideBar = () => {
+type SideBarProps = {
+  setCurrentFolderID: (id: string , name : string) => void;
+};
+
+const SideBar = ({ setCurrentFolderID }: SideBarProps) => {
   return (
     <nav className=" flex flex-col w-[20%] h-full bg-[#181818;] pt-5 gap-y-7">
       <div className="flex justify-between items-center pl-4 pr-6">
@@ -17,10 +21,10 @@ const SideBar = () => {
         </div>
       </div>
       <div>
-        <Folders />
+        <Folders setCurrentFolderID={setCurrentFolderID} />
       </div>
       <div className="flex flex-col gap-2.5">
-        <h5 className="pl-2.5 text-xs text-[#FFFFFF99]">More</h5>
+        <h5 className="pl-2.5 text-sm text-[#FFFFFF99]">More</h5>
         <div className="flex flex-col gap-y-3">
           <div className="flex gap-x-3 pl-2.5">
             <img src="./src/assets/star-icon.svg" alt="star-icon" />

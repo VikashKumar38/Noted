@@ -1,13 +1,13 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { notes } from "../notesModels";
+import { notesRecent } from "../notesModels";
 
 type recentNotes = {
-  recentNotes: [];
+  recentNotes: notesRecent[];
 };
 
 export const Recents = () => {
-  const [recents, setRecents] = useState<notes[]>([]);
+  const [recents, setRecents] = useState<notesRecent[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,18 +25,18 @@ export const Recents = () => {
     fetchRecents();
   }, []);
   return (
-    <div className="pl-2.5">
-      <h5 className="text-xs text-[#FFFFFF99]">Recents</h5>
+    <div className="pl-2.5 flex flex-col gap-y-3">
+      <h5 className="text-sm text-[#FFFFFF99]">Recents</h5>
       {loading && <p className="text-gray-400">Loading...</p>}
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-col">
         {recents.map((item) => (
-          <li key={item.id} className="flex items-center gap-2">
+          <li key={item.id} className="flex gap-x-3 gap-y-3">
             <img
-              src="/assets/Reflection.svg"
+              src="src/assets/nonSelected-recent.svg"
               alt="Reflection Icon"
               className="w-6 h-6"
             />
-            <span>{item.title}</span>
+            <span className="text-[#FFFFFF] text-sm">{item.title}</span>
           </li>
         ))}
       </div>

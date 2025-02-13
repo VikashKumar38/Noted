@@ -1,5 +1,5 @@
 import { foldermodel } from "./foldermodel";
-export type notes = {
+export type notesRecent = {
   id: string;
   folderId: string;
   title: string;
@@ -9,5 +9,6 @@ export type notes = {
   createdAt: string;
   updatedAt: string;
   deletedAt: string;
+  preview: string;
   folder: foldermodel;
 };
