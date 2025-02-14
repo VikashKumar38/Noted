@@ -1,22 +1,24 @@
 import { InitialDisplayView } from "../initialDisplayview";
 import { Note } from "./maincomponent";
 import { Restore } from "./restoreDisplay-icon";
+import { ContentView } from "../ContentDisplayView";
 
-type DisplayviewProps = {
-  note: Note;
+export type DisplayviewProps = {
+  note?: Note;
 };
 
 const Displayview = ({ note }: DisplayviewProps) => {
   return (
-    <div className="flex flex-col w-[60%] items-center justify-center h-dvh bg-[#181818]">
+    <div className=" w-[60%] h-dvh bg-[#181818]">
       <div>
-        {!note ? (
-          <InitialDisplayView />
-        ) : note.isArchived ? (
-          <Restore />
+        {note ? (
+          note.isArchived ? (
+            <Restore />
+          ) : (
+            <ContentView note={note} />
+          )
         ) : (
-          <h1 className="text-white">{note.content
-            }</h1>
+          <InitialDisplayView />
         )}
       </div>
     </div>

@@ -1,11 +1,18 @@
 import { Folders } from "../Folders";
+import { Note } from "./maincomponent";
 import { Recents } from "./Recents";
 
-type SideBarProps = {
-  setCurrentFolderID: (id: string , name : string) => void;
+export type SideBarProps = {
+  setCurrentFolderID: (id: string, name: string) => void;
+  setSelectedNoteID: (id: string | null) => void;
+  handleNoteSelection: (note: Note | undefined) => void;
 };
 
-const SideBar = ({ setCurrentFolderID }: SideBarProps) => {
+const SideBar = ({
+  setCurrentFolderID,
+  setSelectedNoteID,
+  handleNoteSelection,
+}: SideBarProps) => {
   return (
     <nav className=" flex flex-col w-[20%] h-full bg-[#181818;] pt-5 gap-y-7">
       <div className="flex justify-between items-center pl-4 pr-6">
@@ -13,11 +20,14 @@ const SideBar = ({ setCurrentFolderID }: SideBarProps) => {
         <img src="./src/assets/search-icon.svg" alt="search-icon" />
       </div>
       <div className=" flex items-center justify-center ">
-        <img className="w-[85%]" src="./src/assets/NewNote.svg" alt="" />
+        <img className="w-[88%]" src="./src/assets/NewNote.svg" alt="" />
       </div>
       <div>
         <div className="flex flex-col">
-          <Recents />
+          <Recents
+            setSelectedNoteID={setSelectedNoteID}
+            handleNoteSelection={handleNoteSelection}
+          />
         </div>
       </div>
       <div>

@@ -22,22 +22,39 @@ export type Note = {
 };
 export type folderProps = {
   folder: Folder;
-  setNote: React.Dispatch<React.SetStateAction<Note | undefined>>;
+  onNoteSelect: (note: Note | undefined) => void;
 };
+
 const MainComponent = () => {
   const [currentFolderId, setCurrentFolderID] = useState<Folder>({
     id: "",
     name: "",
   });
-  const [notesId, setNotesId] = useState<Note | undefined>();
+
+  const [notesData, setNoteData] = useState<Note | undefined>(undefined);
+  const [selectedNoteID, setNoteID] = useState<string | null>(null);
+
+  const handleNoteSelection = (note: Note | undefined) => {
+    setNoteData(note);
+    setNoteID(note ? note.id : null);
+  };
+
   const handleSetCurrentFolder = (id: string, name: string) => {
     setCurrentFolderID({ id: id, name: name });
   };
+
+  console.log("Selected Note ID:", selectedNoteID);
+  console.log("Current Note Data:", notesData);   
+
   return (
-    <div className="bg-[#181818] h-dvh flex">
-      <SideBar setCurrentFolderID={handleSetCurrentFolder} />
-      <FolderView folder={currentFolderId} setNote={setNotesId} />
-      <Displayview note={notesId} />
+    <div className="bg-[#181818] h-[100%] flex">
+      <SideBar
+        setCurrentFolderID={handleSetCurrentFolder}
+        setSelectedNoteID={setNoteID}
+        handleNoteSelection={handleNoteSelection}
+      />
+      <FolderView folder={currentFolderId} onNoteSelect={handleNoteSelection} />
+      <Displayview note={notesData} />
     </div>
   );
 };

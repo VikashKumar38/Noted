@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { notesRecent } from "../notesModels";
-import axios from "axios";
 import { folderProps } from "./maincomponent";
+import { AxiosApi } from "../ApiBaseUrl";
 
-const FolderView = ({ folder, setNote }: folderProps) => {
+const FolderView = ({ folder, onNoteSelect }: folderProps) => {
   const [notesView, setNotesView] = useState<notesRecent[]>([]);
 
   useEffect(() => {
     const fetchNotesView = async () => {
       try {
-        const response = await axios.get("api/notes", {
+        const response = await AxiosApi.get("/notes", {
           params: {
             archived: false,
             favorite: false,
@@ -30,8 +30,8 @@ const FolderView = ({ folder, setNote }: folderProps) => {
 
   const onClickHandler = async (id: string) => {
     try {
-      const response = await axios.get(`/api/notes/${id}`);
-      setNote(response.data.note);
+      const response = await AxiosApi.get(`/notes/${id}`);
+      onNoteSelect(response.data.note);
     } catch (error) {
       console.log("error in fetching the notes", error);
     }
