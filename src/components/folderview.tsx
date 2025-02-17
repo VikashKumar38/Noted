@@ -7,6 +7,7 @@ const FolderView = ({
   folder,
   onNoteSelect,
   selectedMoreOption,
+  searchContent,
 }: folderProps) => {
   const [notesView, setNotesView] = useState<notesRecent[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -72,23 +73,27 @@ const FolderView = ({
             const formattedDate = new Date(item.createdAt).toLocaleDateString(
               "en-GB"
             );
-            return (
-              <div
-                key={item.id}
-                onClick={() => onClickHandler(item.id)}
-                className="flex flex-col p-4 bg-[#FFFFFF08] cursor-pointer"
-              >
-                <div className="flex flex-col gap-y-3">
-                  <p className="text-xl text-white">{item.title}</p>
-                  <div className="flex justify-around">
-                    <p className="text-[#FFFFFF99] text-sm">{formattedDate}</p>
-                    <p className="text-[#FFFFFF99] text-sm">
-                      {item.preview.slice(0, 25) + "...."}
-                    </p>
+            if (item.title.toLocaleLowerCase().includes(searchContent)) {
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => onClickHandler(item.id)}
+                  className="flex flex-col p-4 bg-[#FFFFFF08] cursor-pointer"
+                >
+                  <div className="flex flex-col gap-y-3">
+                    <p className="text-xl text-white">{item.title}</p>
+                    <div className="flex justify-around">
+                      <p className="text-[#FFFFFF99] text-sm">
+                        {formattedDate}
+                      </p>
+                      <p className="text-[#FFFFFF99] text-sm">
+                        {item.preview.slice(0, 25) + "...."}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
+              );
+            }
           })}
         </div>
         <div className="flex justify-center gap-4 mt-4">

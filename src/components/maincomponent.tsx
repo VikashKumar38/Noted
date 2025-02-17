@@ -24,6 +24,7 @@ export type folderProps = {
   folder: Folder;
   onNoteSelect: (note: Note | undefined) => void;
   selectedMoreOption: string;
+  searchContent: string;
 };
 
 const MainComponent = () => {
@@ -36,6 +37,7 @@ const MainComponent = () => {
   const [selectedNoteID, setSelectedNoteID] = useState<string | null>(null);
   const [selectedMoreOption, setSelectedMoreOption] = useState<string>("");
   const [isNewNoteClicked, setNewNoteClicked] = useState<boolean>(false);
+  const [searchContent, setSearchContent] = useState("");
 
   const handleNoteSelection = (note: Note | undefined) => {
     setNoteData(note);
@@ -58,11 +60,14 @@ const MainComponent = () => {
         handleNoteSelection={handleNoteSelection}
         setSelectedMoreOption={setSelectedMoreOption}
         setNewNoteClicked={setNewNoteClicked}
+        setSearchContent={setSearchContent}
+        searchContent={searchContent}
       />
       <FolderView
         folder={currentFolderId}
         onNoteSelect={handleNoteSelection}
         selectedMoreOption={selectedMoreOption}
+        searchContent={searchContent}
       />
       <Displayview
         note={notesData}

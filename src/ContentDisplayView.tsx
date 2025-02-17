@@ -47,14 +47,14 @@ export const ContentView = ({
         isArchived: false,
       });
       const latestNotesResponse = await AxiosApi.get("/notes", {
-        params: { folderId: currentfolderid }, // Fetch notes for the same folder
+        params: { folderId: currentfolderid },
       });
 
-      // Get the latest note from the list
-      const savedNote = latestNotesResponse.data?.slice(-1)[0]; // Assuming latest is last
+      const savedNote = latestNotesResponse.data?.notes;
+      console.log("newly created :- " + savedNote);
 
       if (savedNote) {
-        setCurrentNote(savedNote); // Display the newly saved note
+        setCurrentNote(savedNote);
       }
       setNewNoteClicked(false);
       console.log("Note saved successfully:", response.data);
@@ -186,7 +186,7 @@ export const ContentView = ({
                 <span className="text-sm text-[#FFFFFF99]">Folder</span>
               </div>
               <span className="text-sm underline text-[#FFFFFF]">
-                {currentNote!.folder?.name || "No folder"}
+                {currentNote?.folder?.name || "No folder"}
               </span>
             </div>
 
@@ -200,7 +200,7 @@ export const ContentView = ({
           </>
         ) : (
           <div className="flex items-center justify-center">
-            <Restore note={currentNote} />
+            <Restore note={currentNote} setCurrentNote={setCurrentNote} />
           </div>
         )}
       </div>

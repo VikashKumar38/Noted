@@ -1,10 +1,24 @@
+import { AxiosApi } from "../ApiBaseUrl";
 import { Note } from "./maincomponent";
 
 type RestoreProps = {
   note: Note;
+  setCurrentNote: (note: Note) => void;
 };
 
-export const Restore = ({ note }: RestoreProps) => {
+export const Restore = ({ note, setCurrentNote }: RestoreProps) => {
+  const onClickRestore = async () => {
+    try {
+      const response = await AxiosApi.post(`/notes/${note.id}/restore`);
+      console.log(response.data);
+      const currentNote = await AxiosApi.get(`/notes/${note.id}`);
+      setCurrentNote(currentNote.data.note);
+      console.log(currentNote);
+    } catch (error) {
+      console.log("error in restoring", error);
+    }
+  };
+
   return (
     <div className="w-full flex flex-col h-screen justify-center items-center">
       <div className="flex flex-col justify-center items-center gap-y-8 w-[50%]">
@@ -15,7 +29,10 @@ export const Restore = ({ note }: RestoreProps) => {
           'Restore' button and it will be added back to your list. It's that
           simple.
         </p>
-        <button className="bg-[#312EB5] rounded-md pt-3 pb-3 pl-7 pr-7 cursor-pointer">
+        <button
+          onClick={onClickRestore}
+          className="bg-[#312EB5] rounded-md pt-3 pb-3 pl-7 pr-7 cursor-pointer"
+        >
           Restore
         </button>
       </div>
