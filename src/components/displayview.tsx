@@ -1,22 +1,37 @@
 import { InitialDisplayView } from "../initialDisplayview";
 import { Note } from "./maincomponent";
-import { Restore } from "./restoreDisplay-icon";
 import { ContentView } from "../ContentDisplayView";
 
 export type DisplayviewProps = {
-  note?: Note;
+  note?: Note | null;
+  isNewNoteClicked: boolean;
+  setNewNoteClicked: (isclicked: boolean) => void;
+  currentfolderid: string;
 };
 
-const Displayview = ({ note }: DisplayviewProps) => {
+const Displayview = ({
+  note,
+  isNewNoteClicked,
+  setNewNoteClicked,
+  currentfolderid,
+}: DisplayviewProps) => {
   return (
-    <div className=" w-[60%] h-dvh bg-[#181818]">
+    <div className="w-[60%] h-dvh bg-[#181818]">
       <div>
-        {note ? (
-          note.isArchived ? (
-            <Restore />
-          ) : (
-            <ContentView note={note} />
-          )
+        {isNewNoteClicked ? (
+          <ContentView
+            note={null}
+            isNewNoteClicked={true}
+            setNewNoteClicked={setNewNoteClicked}
+            currentfolderid={currentfolderid}
+          />
+        ) : note ? (
+          <ContentView
+            note={note}
+            isNewNoteClicked={false}
+            setNewNoteClicked={setNewNoteClicked}
+            currentfolderid={currentfolderid}
+          />
         ) : (
           <InitialDisplayView />
         )}
@@ -24,4 +39,5 @@ const Displayview = ({ note }: DisplayviewProps) => {
     </div>
   );
 };
+
 export default Displayview;

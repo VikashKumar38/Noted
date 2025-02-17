@@ -23,6 +23,7 @@ export type Note = {
 export type folderProps = {
   folder: Folder;
   onNoteSelect: (note: Note | undefined) => void;
+  selectedMoreOption: string;
 };
 
 const MainComponent = () => {
@@ -32,29 +33,43 @@ const MainComponent = () => {
   });
 
   const [notesData, setNoteData] = useState<Note | undefined>(undefined);
-  const [selectedNoteID, setNoteID] = useState<string | null>(null);
+  const [selectedNoteID, setSelectedNoteID] = useState<string | null>(null);
+  const [selectedMoreOption, setSelectedMoreOption] = useState<string>("");
+  const [isNewNoteClicked, setNewNoteClicked] = useState<boolean>(false);
 
   const handleNoteSelection = (note: Note | undefined) => {
     setNoteData(note);
-    setNoteID(note ? note.id : null);
+    setSelectedNoteID(note ? note.id : null);
   };
 
   const handleSetCurrentFolder = (id: string, name: string) => {
     setCurrentFolderID({ id: id, name: name });
+    setSelectedMoreOption("");
   };
 
   console.log("Selected Note ID:", selectedNoteID);
-  console.log("Current Note Data:", notesData);   
+  console.log("Current Note Data:", notesData);
 
   return (
-    <div className="bg-[#181818] h-[100%] flex">
+    <div className="bg-[#181818] h-[100%] flex overflow-hidden">
       <SideBar
         setCurrentFolderID={handleSetCurrentFolder}
-        setSelectedNoteID={setNoteID}
+        setSelectedNoteID={setSelectedNoteID}
         handleNoteSelection={handleNoteSelection}
+        setSelectedMoreOption={setSelectedMoreOption}
+        setNewNoteClicked={setNewNoteClicked}
       />
-      <FolderView folder={currentFolderId} onNoteSelect={handleNoteSelection} />
-      <Displayview note={notesData} />
+      <FolderView
+        folder={currentFolderId}
+        onNoteSelect={handleNoteSelection}
+        selectedMoreOption={selectedMoreOption}
+      />
+      <Displayview
+        note={notesData}
+        isNewNoteClicked={isNewNoteClicked}
+        setNewNoteClicked={setNewNoteClicked}
+        currentfolderid={currentFolderId.id}
+      />
     </div>
   );
 };

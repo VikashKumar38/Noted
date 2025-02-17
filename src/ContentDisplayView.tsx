@@ -1,18 +1,25 @@
-import axios from "axios";
 import { DisplayviewProps } from "./components/displayview";
 import { useEffect, useState } from "react";
 import { Restore } from "./components/restoreDisplay-icon";
 import { Note } from "./components/maincomponent";
+import { AxiosApi } from "./ApiBaseUrl";
 
 type Position = {
   positionX: number;
   positionY: number;
 };
 
-export const ContentView = ({ note }: DisplayviewProps) => {
+export const ContentView = ({
+  note,
+  isNewNoteClicked,
+  setNewNoteClicked,
+  currentfolderid,
+}: DisplayviewProps) => {
   const [position, setPosition] = useState<Position | null>(null);
   const [loading, setLoading] = useState(false);
   const [currentNote, setCurrentNote] = useState<Note | null>(note ?? null);
+  const [newNoteContent, setNewNoteContent] = useState<string>("");
+  const [newNoteTitle, setNewNoteTitle] = useState<string>("");
 
   useEffect(() => {
     if (note) {
@@ -20,31 +27,137 @@ export const ContentView = ({ note }: DisplayviewProps) => {
     }
   }, [note]);
 
+  useEffect(() => {
+    if (isNewNoteClicked) {
+      setCurrentNote(null); // Ensure blank note
+      setNewNoteTitle(""); // Reset title
+      setNewNoteContent(""); // Reset content
+    } else if (note) {
+      setCurrentNote(note); // Load selected note
+    }
+  }, [isNewNoteClicked, note]);
+
+  const onClickSaveNote = async () => {
+    try {
+      const response = await AxiosApi.post("/notes", {
+        folderId: currentfolderid,
+        title: newNoteTitle,
+        content: newNoteContent,
+        isFavorite: false,
+        isArchived: false,
+      });
+      const latestNotesResponse = await AxiosApi.get("/notes", {
+        params: { folderId: currentfolderid }, // Fetch notes for the same folder
+      });
+
+      // Get the latest note from the list
+      const savedNote = latestNotesResponse.data?.slice(-1)[0]; // Assuming latest is last
+
+      if (savedNote) {
+        setCurrentNote(savedNote); // Display the newly saved note
+      }
+      setNewNoteClicked(false);
+      console.log("Note saved successfully:", response.data);
+    } catch (error) {
+      console.error("Error saving note:", error);
+    }
+  };
+
   const formattedDate: string = currentNote
     ? new Date(currentNote.createdAt).toLocaleDateString("en-GB")
     : "";
 
   const onDeleteHandler = async () => {
-    if (!currentNote) return;
+    if (!currentNote || currentNote.isArchived) return;
+
+    setLoading(true);
 
     try {
-      await axios.delete(`/api/notes/${currentNote.id}`);
+      await AxiosApi.delete(`notes/${note?.id}`);
+      setCurrentNote((prev) =>
+        prev
+          ? {
+              ...prev,
+              deletedAt: new Date().toLocaleDateString("en-GB"),
+            }
+          : null
+      );
     } catch (error) {
       console.log("Error deleting note:", error);
     } finally {
-      setLoading(true);
+      setLoading(false);
     }
   };
+
+  const onClickArchive = async () => {
+    try {
+      const response = await AxiosApi.patch(`/notes/${note?.id}`, {
+        isArchived: true,
+      });
+      console.log(response);
+    } catch (error) {
+      console.log("Error in adding to archive", error);
+    }
+  };
+
+  const AddToFav = async () => {
+    if (!note || !note.id) {
+      console.log("No note selected to add to favorites");
+      return;
+    }
+
+    try {
+      const response = await AxiosApi.patch(`/notes/${note.id}`, {
+        folderId: currentfolderid,
+        title: note.title,
+        content: note.content,
+        isFavorite: true,
+        isArchived: false,
+      });
+
+      console.log("Added to favorites:", response.data);
+      setCurrentNote((prev) => (prev ? { ...prev, isFavorite: true } : null)); // Update UI
+    } catch (error) {
+      console.error("Error adding to favorites:", error);
+    }
+  };
+
+  if (isNewNoteClicked) {
+    return (
+      <div className="flex flex-col w-full p-6 text-white">
+        <input
+          type="text"
+          className="text-xl bg-transparent border-b border-gray-500 outline-none w-full"
+          placeholder="Untitled Note"
+          value={newNoteTitle}
+          onChange={(e) => setNewNoteTitle(e.target.value)}
+        />
+        <textarea
+          className="w-full h-auto bg-transparent outline-none mt-4 text-lg "
+          placeholder="Start typing..."
+          rows={30}
+          value={newNoteContent}
+          onChange={(e) => setNewNoteContent(e.target.value)}
+        ></textarea>
+        <button
+          onClick={onClickSaveNote}
+          className="mt-4 bg-blue-600 p-2 rounded-md cursor-pointer"
+        >
+          Save
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col">
       <div className="flex flex-col gap-y-6 pl-10 pt-12 pr-12">
         {loading ? (
           <p className="text-white">Loading...</p>
-        ) : currentNote ? (
+        ) : !currentNote?.deletedAt ? (
           <>
             <div className="flex text-4xl text-white justify-between items-center">
-              <div>{currentNote.title}</div>
+              <div>{currentNote!.title}</div>
               <img
                 onClick={(e) =>
                   setPosition({ positionX: e.pageX, positionY: e.pageY })
@@ -73,16 +186,22 @@ export const ContentView = ({ note }: DisplayviewProps) => {
                 <span className="text-sm text-[#FFFFFF99]">Folder</span>
               </div>
               <span className="text-sm underline text-[#FFFFFF]">
-                {currentNote.folder?.name || "No folder"}
+                {currentNote!.folder?.name || "No folder"}
               </span>
             </div>
 
-            <div className="text-[#FFFFFF] text-md">
-              {!currentNote.isArchived ? currentNote.content : <Restore />}
+            <div
+              className="text-[#FFFFFF] text-md max-h-[900px] overflow-y-scroll overflow-x-hidden  [&::-webkit-scrollbar]:w-2
+  dark:[&::-webkit-scrollbar-track]:bg-gray-400 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full
+  dark:[&::-webkit-scrollbar-thumb]:bg-gray-500"
+            >
+              {currentNote!.content}
             </div>
           </>
         ) : (
-          <p className="text-white">No note selected</p>
+          <div className="flex items-center justify-center">
+            <Restore note={currentNote} />
+          </div>
         )}
       </div>
 
@@ -96,13 +215,23 @@ export const ContentView = ({ note }: DisplayviewProps) => {
           }}
         >
           <ul className="flex flex-col gap-y-4">
-            <li className="flex gap-x-1 cursor-pointer hover:bg-gray-600 pt-1 pb-1 rounded-sm">
+            <li
+              onClick={AddToFav}
+              className="flex gap-x-1 cursor-pointer hover:bg-gray-600 pt-1 pb-1 rounded-sm"
+            >
               <img src="./src/assets/fav-icon.svg" alt="fav" />
-              <span className="text-sm">Add to favorites</span>
+              <span className="text-sm">
+                {currentNote?.isFavorite ? "Remove Favorite" : "Add Favorite"}
+              </span>
             </li>
-            <li className="flex gap-x-1 cursor-pointer hover:bg-gray-600 pt-1 pb-1 rounded-sm">
+            <li
+              onClick={onClickArchive}
+              className="flex gap-x-1 cursor-pointer hover:bg-gray-600 pt-1 pb-1 rounded-sm"
+            >
               <img src="./src/assets/content-archive.svg" alt="archive" />
-              <span className="text-sm">Archived</span>
+              <span className="text-sm">
+                {currentNote?.isArchived ? "Unarchive" : "Archive"}
+              </span>
             </li>
             <li className="flex gap-x-1">
               <div className="h-[0.1px] w-full bg-gray-600"></div>
