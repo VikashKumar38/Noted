@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { foldermodel } from "./foldermodel";
 import { AxiosApi } from "./ApiBaseUrl";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { RotateLoader } from "react-spinners";
 
 type eventPosition = {
   pageX: number;
@@ -8,11 +10,11 @@ type eventPosition = {
   folderId: string;
   folderName: string;
 };
-type SideBarProps = {
-  setCurrentFolderID: (id: string, name: string) => void;
+type seTfolderprops = {
+  handleSetCurrentFolder: (id: string, name: string) => void;
 };
 
-export const Folders = ({ setCurrentFolderID }: SideBarProps) => {
+export const Folders = ({ handleSetCurrentFolder }: seTfolderprops) => {
   const [folderList, setFolders] = useState<foldermodel[]>([]);
   const [loading, setLoading] = useState(true);
   const [position, setPosition] = useState<eventPosition | null>(null);
@@ -21,15 +23,23 @@ export const Folders = ({ setCurrentFolderID }: SideBarProps) => {
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [editedFolderId, setEditedFolderId] = useState<string | null>(null);
 
+  const navigate = useNavigate();
+  const { folderId } = useParams();
+  const location = useLocation();
   useEffect(() => {
     const fetchRecents = async () => {
       try {
         const response = await AxiosApi.get("/folders");
         setFolders(response.data.folders);
-        setCurrentFolderID(
-          response.data.folders[0].id,
-          response.data.folders[0].name
-        );
+        if (!selectedFolder && response.data.folders.length > 0) {
+          setSelectedFolder(response.data.folders[0].id);
+        }
+        // ✅ Only navigate if no folder is selected in the URL
+        if (!folderId && !location.search.includes("folderName")) {
+          navigate(
+            `/folders/${response.data.folders[0].id}/${response.data.folders[0].name}`
+          );
+        }
       } catch (error) {
         console.log(error);
       } finally {
@@ -38,7 +48,11 @@ export const Folders = ({ setCurrentFolderID }: SideBarProps) => {
     };
 
     fetchRecents();
-  }, []);
+  }, [folderId, location.search, navigate, selectedFolder]); // ✅ Added dependencies
+
+  const onclickNavigate = (id: string, name: string) => {
+    navigate(`/folders/${id}/${name}`);
+  };
 
   const onClickHandler = async () => {
     try {
@@ -48,7 +62,7 @@ export const Folders = ({ setCurrentFolderID }: SideBarProps) => {
       const response = await AxiosApi.get("/folders");
 
       setFolders(response.data.folders);
-      setCurrentFolderID(folderList[0].id, folderList[0].name);
+      handleSetCurrentFolder(folderList[0].id, folderList[0].name);
     } catch (error) {
       console.error("Error creating folder:", error);
     }
@@ -67,8 +81,10 @@ export const Folders = ({ setCurrentFolderID }: SideBarProps) => {
         folderName: name,
       });
     else if (e.button === 0) {
+      console.log("idddd", id);
+
       setSelectedFolder(id);
-      setCurrentFolderID(id, name);
+      handleSetCurrentFolder(id, name);
     }
   };
 
@@ -129,14 +145,22 @@ export const Folders = ({ setCurrentFolderID }: SideBarProps) => {
         <img
           className="cursor-pointer"
           onClick={onClickHandler}
-          src="./src/assets/add-folder-icon.svg"
+          src="/src/assets/add-folder-icon.svg"
           alt="add folder"
         />
       </div>
-      {loading && <p className="text-gray-400 text-">Loading...</p>}
+      {loading && (
+        <div className="flex items-center h-full justify-center">
+          <RotateLoader color="gray" size={20} />
+        </div>
+      )}
       <div className="flex flex-col gap-y-4">
         {folderList.map((item) => (
-          <li key={item.id} className="flex">
+          <li
+            onClick={() => onclickNavigate(item.id, item.name)}
+            key={item.id}
+            className="flex"
+          >
             <div
               className={`flex gap-x-3 w-full pt-1 pb-1 pl-2.5 hover:bg-[#FFFFFF08] ${
                 selectedFolder === item.id
@@ -144,12 +168,6 @@ export const Folders = ({ setCurrentFolderID }: SideBarProps) => {
                   : "bg-transparent"
               }`}
             >
-              <img
-                className="cursor-pointer"
-                onMouseDown={(e) => onMouseDownHandler(e, item.id, item.name)}
-                src="src/assets/noneSelected-folder-icon.svg"
-                alt="Folder Icon"
-              />
               {isEditing && editedFolderId === item.id ? (
                 <input
                   type="text"
@@ -158,13 +176,45 @@ export const Folders = ({ setCurrentFolderID }: SideBarProps) => {
                   onKeyDown={handleKeyDown}
                   className="text-[#FFFFFF99] text-sm border border-solid-black"
                 />
+              ) : selectedFolder === item.id ? (
+                // When selectedFolder matches item.id, render different img and span
+                <>
+                  <img
+                    className="cursor-pointer"
+                    onMouseDown={(e) =>
+                      onMouseDownHandler(e, item.id, item.name)
+                    }
+                    src="/src/assets/open-folder-icon.svg" // Change to selected icon
+                    alt="Selected Folder Icon"
+                  />
+                  <span
+                    onMouseDown={(e) =>
+                      onMouseDownHandler(e, item.id, item.name)
+                    }
+                    className="text-white text-sm cursor-pointer font-bold"
+                  >
+                    {item.name}
+                  </span>
+                </>
               ) : (
-                <span
-                  onMouseDown={(e) => onMouseDownHandler(e, item.id, item.name)}
-                  className="text-[#FFFFFF99] text-sm cursor-pointer"
-                >
-                  {item.name}
-                </span>
+                <>
+                  <img
+                    className="cursor-pointer"
+                    onMouseDown={(e) =>
+                      onMouseDownHandler(e, item.id, item.name)
+                    }
+                    src="/src/assets/noneSelected-folder-icon.svg"
+                    alt="Folder Icon"
+                  />
+                  <span
+                    onMouseDown={(e) =>
+                      onMouseDownHandler(e, item.id, item.name)
+                    }
+                    className="text-[#FFFFFF99] text-sm cursor-pointer"
+                  >
+                    {item.name}
+                  </span>
+                </>
               )}
             </div>
           </li>

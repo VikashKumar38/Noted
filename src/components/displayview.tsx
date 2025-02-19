@@ -1,6 +1,10 @@
 import { InitialDisplayView } from "../initialDisplayview";
 import { Note } from "./maincomponent";
 import { ContentView } from "../ContentDisplayView";
+import { useLocation, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { AxiosApi } from "../ApiBaseUrl";
+import { RotateLoader } from "react-spinners";
 
 export type DisplayviewProps = {
   note?: Note | null;
@@ -10,13 +14,48 @@ export type DisplayviewProps = {
 };
 
 const Displayview = ({
-  note,
   isNewNoteClicked,
   setNewNoteClicked,
   currentfolderid,
 }: DisplayviewProps) => {
+  const [loading, setLoading] = useState(false);
+
+  const [note, setNote] = useState();
+
+  const { noteID } = useParams();
+
+  console.log("noteid", noteID);
+
+  const path = useLocation();
+
+  useEffect(() => {
+    const FetchNote = async () => {
+      try {
+        if (
+          (path.pathname.includes("recents") ||
+            path.pathname.includes("more")) &&
+          noteID
+        ) {
+          setLoading(true);
+          const response = await AxiosApi.get(`/notes/${noteID}`);
+          setNote(response.data.note);
+        }
+      } catch (error) {
+        console.error("Error fetching note:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    FetchNote();
+  }, [noteID, path.pathname]);
+
   return (
     <div className="w-[60%] h-dvh bg-[#181818]">
+      {loading && (
+        <div className="flex items-center h-full justify-center">
+          <RotateLoader color="gray" size={20} />
+        </div>
+      )}
       <div>
         {isNewNoteClicked ? (
           <ContentView

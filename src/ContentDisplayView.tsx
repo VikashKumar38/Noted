@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { Restore } from "./components/restoreDisplay-icon";
 import { Note } from "./components/maincomponent";
 import { AxiosApi } from "./ApiBaseUrl";
+import { RotateLoader } from "react-spinners";
+// import { useParams } from "react-router-dom";
 
 type Position = {
   positionX: number;
@@ -27,15 +29,8 @@ export const ContentView = ({
     }
   }, [note]);
 
-  useEffect(() => {
-    if (isNewNoteClicked) {
-      setCurrentNote(null); // Ensure blank note
-      setNewNoteTitle(""); // Reset title
-      setNewNoteContent(""); // Reset content
-    } else if (note) {
-      setCurrentNote(note); // Load selected note
-    }
-  }, [isNewNoteClicked, note]);
+  // const { folderId, folderName } = useParams();
+  // console.log("printing folder id in contentview", folderId, folderName);
 
   const onClickSaveNote = async () => {
     try {
@@ -61,6 +56,9 @@ export const ContentView = ({
     } catch (error) {
       console.error("Error saving note:", error);
     }
+  };
+  const onClickBack = () => {
+    setNewNoteClicked(false);
   };
 
   const formattedDate: string = currentNote
@@ -125,6 +123,11 @@ export const ContentView = ({
   if (isNewNoteClicked) {
     return (
       <div className="flex flex-col w-full p-6 text-white">
+        {loading && (
+          <div className="flex items-center h-full justify-center">
+            <RotateLoader color="gray" size={20} />
+          </div>
+        )}
         <input
           type="text"
           className="text-xl bg-transparent border-b border-gray-500 outline-none w-full"
@@ -139,12 +142,20 @@ export const ContentView = ({
           value={newNoteContent}
           onChange={(e) => setNewNoteContent(e.target.value)}
         ></textarea>
-        <button
-          onClick={onClickSaveNote}
-          className="mt-4 bg-blue-600 p-2 rounded-md cursor-pointer"
-        >
-          Save
-        </button>
+        <div className="flex justify-center items-center gap-x-5">
+          <button
+            onClick={onClickSaveNote}
+            className=" bg-blue-600 p-2 rounded-md cursor-pointer"
+          >
+            Save
+          </button>
+          <button
+            className=" bg-blue-600 p-2 rounded-md cursor-pointer"
+            onClick={onClickBack}
+          >
+            back
+          </button>
+        </div>
       </div>
     );
   }
@@ -153,7 +164,9 @@ export const ContentView = ({
     <div className="flex flex-col">
       <div className="flex flex-col gap-y-6 pl-10 pt-12 pr-12">
         {loading ? (
-          <p className="text-white">Loading...</p>
+          <div className="flex items-center h-full justify-center">
+            <RotateLoader color="gray" size={20} />
+          </div>
         ) : !currentNote?.deletedAt ? (
           <>
             <div className="flex text-4xl text-white justify-between items-center">
@@ -163,14 +176,14 @@ export const ContentView = ({
                   setPosition({ positionX: e.pageX, positionY: e.pageY })
                 }
                 className="cursor-pointer"
-                src="./src/assets/option-icon.svg"
+                src="/src/assets/option-icon.svg"
                 alt="content option"
               />
             </div>
 
             <div className="flex gap-x-12">
               <div className="flex gap-x-4 items-center">
-                <img src="./src/assets/Date-icon.svg" alt="Date" />
+                <img src="/src/assets/Date-icon.svg" alt="Date" />
                 <span className="text-sm text-[#FFFFFF99]">Date</span>
               </div>
               <span className="text-sm underline text-[#FFFFFF]">
@@ -182,7 +195,7 @@ export const ContentView = ({
 
             <div className="flex gap-x-9">
               <div className="flex justify-around gap-x-4">
-                <img src="./src/assets/folder-icon.svg" alt="folder" />
+                <img src="/src/assets/folder-icon.svg" alt="folder" />
                 <span className="text-sm text-[#FFFFFF99]">Folder</span>
               </div>
               <span className="text-sm underline text-[#FFFFFF]">
@@ -219,7 +232,7 @@ export const ContentView = ({
               onClick={AddToFav}
               className="flex gap-x-1 cursor-pointer hover:bg-gray-600 pt-1 pb-1 rounded-sm"
             >
-              <img src="./src/assets/fav-icon.svg" alt="fav" />
+              <img src="/src/assets/fav-icon.svg" alt="fav" />
               <span className="text-sm">
                 {currentNote?.isFavorite ? "Remove Favorite" : "Add Favorite"}
               </span>
@@ -228,7 +241,7 @@ export const ContentView = ({
               onClick={onClickArchive}
               className="flex gap-x-1 cursor-pointer hover:bg-gray-600 pt-1 pb-1 rounded-sm"
             >
-              <img src="./src/assets/content-archive.svg" alt="archive" />
+              <img src="/src/assets/content-archive.svg" alt="archive" />
               <span className="text-sm">
                 {currentNote?.isArchived ? "Unarchive" : "Archive"}
               </span>
@@ -240,7 +253,7 @@ export const ContentView = ({
               onClick={onDeleteHandler}
               className="flex gap-x-1 cursor-pointer hover:bg-red-500 rounded-sm pt-1 pb-1"
             >
-              <img src="./src/assets/delete-icon.svg" alt="del" />
+              <img src="/src/assets/delete-icon.svg" alt="del" />
               <span className="text-sm">Delete</span>
             </li>
           </ul>

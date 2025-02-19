@@ -3,7 +3,7 @@ export const InitialDisplayView = () => {
     <div className="flex flex-col justify-center items-center gap-y-3 w-full h-[100vh]">
       <div className="flex flex-col justify-center items-center gap-y-3 max-w-md text-center">
         <img
-          src="./src/assets/initial-display-icon.svg"
+          src="/src/assets/initial-display-icon.svg"
           alt="initial image"
           className="w-16 h-16"
         />

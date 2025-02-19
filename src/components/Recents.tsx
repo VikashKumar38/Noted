@@ -2,18 +2,19 @@ import { useEffect, useState } from "react";
 import { notesRecent } from "../notesModels";
 import { AxiosApi } from "../ApiBaseUrl";
 import { Note } from "./maincomponent";
+import { useNavigate } from "react-router-dom";
+import { RotateLoader } from "react-spinners";
 
 export type recentProps = {
   setSelectedNoteID: (id: string | null) => void;
   handleNoteSelection: (note: Note | undefined) => void;
 };
 
-export const Recents = ({
-  setSelectedNoteID,
-  handleNoteSelection,
-}: recentProps) => {
+export const Recents = () => {
   const [recents, setRecents] = useState<notesRecent[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchRecents = async () => {
@@ -30,32 +31,33 @@ export const Recents = ({
     fetchRecents();
   }, []);
 
-  const handleRecentClick = async (id: string) => {
-    setSelectedNoteID(id); // Update selected note ID
-
-    try {
-      const response = await AxiosApi.get(`/notes/${id}`);
-      const note = response.data.note;
-
-      handleNoteSelection(note); // Pass the full note data to MainComponent
-    } catch (error) {
-      console.error("Error fetching note:", error);
-    }
+  const handleRecentClick = (
+    noteid: string,
+    folderId: string,
+    folderName: string
+  ) => {
+    navigate(`recents/${folderId}/${folderName}/${noteid}`);
   };
 
   return (
     <div className="pl-2.5 flex flex-col gap-y-3">
       <h5 className="text-sm text-[#FFFFFF99]">Recents</h5>
-      {loading && <p className="text-gray-400">Loading...</p>}
+      {loading && (
+        <div className="flex items-center h-full justify-center">
+          <RotateLoader color="gray" size={20} />
+        </div>
+      )}
       <div className="flex gap-2 flex-col">
         {recents.map((item) => (
           <li
-            onClick={() => handleRecentClick(item.id)}
+            onClick={() =>
+              handleRecentClick(item.id, item.folder.id, item.folder.name)
+            }
             key={item.id}
             className="flex gap-x-3 gap-y-3"
           >
             <img
-              src="src/assets/nonSelected-recent.svg"
+              src="/src/assets/nonSelected-recent.svg"
               alt="Reflection Icon"
               className="w-6 h-6 cursor-pointer"
             />
