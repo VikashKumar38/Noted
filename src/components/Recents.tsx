@@ -4,6 +4,7 @@ import { AxiosApi } from "../ApiBaseUrl";
 import { Note } from "./maincomponent";
 import { useNavigate } from "react-router-dom";
 import { RotateLoader } from "react-spinners";
+import { toast } from "react-toastify";
 
 export type recentProps = {
   setSelectedNoteID: (id: string | null) => void;
@@ -23,6 +24,7 @@ export const Recents = () => {
         setRecents(response.data.recentNotes);
       } catch (error) {
         console.log(error);
+        toast.error("failded to fetch recent notes");
       } finally {
         setLoading(false);
       }

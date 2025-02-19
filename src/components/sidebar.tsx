@@ -25,9 +25,7 @@ const SideBar = ({
 
   const queryParams = new URLSearchParams(location.search);
   const searchValue = queryParams.get("search");
-  // const onChangeSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   setSearchContent(e.target.value);
-  // };
+
   const onChangeSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const searchValue = event.target.value;
 

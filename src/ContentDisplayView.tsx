@@ -4,6 +4,7 @@ import { Restore } from "./components/restoreDisplay-icon";
 import { Note } from "./components/maincomponent";
 import { AxiosApi } from "./ApiBaseUrl";
 import { RotateLoader } from "react-spinners";
+import { toast } from "react-toastify";
 // import { useParams } from "react-router-dom";
 
 type Position = {
@@ -29,9 +30,6 @@ export const ContentView = ({
     }
   }, [note]);
 
-  // const { folderId, folderName } = useParams();
-  // console.log("printing folder id in contentview", folderId, folderName);
-
   const onClickSaveNote = async () => {
     try {
       const response = await AxiosApi.post("/notes", {
@@ -41,15 +39,18 @@ export const ContentView = ({
         isFavorite: false,
         isArchived: false,
       });
-      const latestNotesResponse = await AxiosApi.get("/notes", {
-        params: { folderId: currentfolderid },
-      });
+      // const latestNotesResponse = await AxiosApi.get("/notes", {
+      //   params: { folderId: currentfolderid },
+      // });
 
-      const savedNote = latestNotesResponse.data?.notes;
-      console.log("newly created :- " + savedNote);
+      // const savedNote = latestNotesResponse.data?.notes;
+      // console.log("newly created :- " + savedNote);
 
-      if (savedNote) {
-        setCurrentNote(savedNote);
+      // if (savedNote) {
+      //   setCurrentNote(savedNote);
+      // }
+      if (response.data) {
+        toast.success("saved Successfully");
       }
       setNewNoteClicked(false);
       console.log("Note saved successfully:", response.data);
@@ -88,35 +89,54 @@ export const ContentView = ({
   };
 
   const onClickArchive = async () => {
+    if (!currentNote || !currentNote.id) {
+      console.log("No note selected to archive");
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      const response = await AxiosApi.patch(`/notes/${note?.id}`, {
-        isArchived: true,
+      const response = await AxiosApi.patch(`/notes/${currentNote.id}`, {
+        isArchived: !currentNote.isArchived,
       });
-      console.log(response);
+
+      console.log("Updated Archive Status:", response.data);
+
+      // Fetch latest note data after update
+      const updatedNoteResponse = await AxiosApi.get(
+        `/notes/${currentNote.id}`
+      );
+
+      setCurrentNote(updatedNoteResponse.data.note);
     } catch (error) {
-      console.log("Error in adding to archive", error);
+      console.error("Error in adding to archive:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const AddToFav = async () => {
-    if (!note || !note.id) {
+    if (!currentNote || !currentNote.id) {
       console.log("No note selected to add to favorites");
       return;
     }
-
+    setLoading(true);
     try {
-      const response = await AxiosApi.patch(`/notes/${note.id}`, {
-        folderId: currentfolderid,
-        title: note.title,
-        content: note.content,
-        isFavorite: true,
-        isArchived: false,
+      const response = await AxiosApi.patch(`/notes/${currentNote.id}`, {
+        isFavorite: !currentNote?.isFavorite,
       });
+      console.log(response);
 
-      console.log("Added to favorites:", response.data);
-      setCurrentNote((prev) => (prev ? { ...prev, isFavorite: true } : null)); // Update UI
+      const updatedNoteResponse = await AxiosApi.get(
+        `/notes/${currentNote.id}`
+      );
+
+      setCurrentNote(updatedNoteResponse.data.note);
     } catch (error) {
       console.error("Error adding to favorites:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -198,7 +218,7 @@ export const ContentView = ({
                 <img src="/src/assets/folder-icon.svg" alt="folder" />
                 <span className="text-sm text-[#FFFFFF99]">Folder</span>
               </div>
-              <span className="text-sm underline text-[#FFFFFF]">
+              <span className="text-sm underline text-[#FFFFFF] cursor-pointer">
                 {currentNote?.folder?.name || "No folder"}
               </span>
             </div>

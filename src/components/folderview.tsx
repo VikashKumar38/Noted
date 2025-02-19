@@ -35,7 +35,10 @@ const FolderView = () => {
     const fetchNotesView = async () => {
       try {
         setLoading(true);
-        const response = await AxiosApi.get("/notes", {
+        const response = await AxiosApi.get<{
+          notes: notesRecent[];
+          total: number;
+        }>("/notes", {
           params: {
             archived: MoreOptionName === "archived",
             favorite: MoreOptionName === "favorites",
@@ -59,7 +62,7 @@ const FolderView = () => {
     };
 
     fetchNotesView();
-  }, [folderId, currentPage, MoreOptionName, location.pathname, debounceValue]);
+  }, [folderId, currentPage, MoreOptionName, debounceValue]);
 
   const onClickHandler = async (
     id: string,
