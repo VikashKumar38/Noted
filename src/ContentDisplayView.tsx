@@ -33,7 +33,9 @@ export const ContentView = ({
 
   const onClickSaveNote = async () => {
     try {
-      const response = await AxiosApi.post("/notes", {
+      const response = await AxiosApi.post<{
+        id: string;
+      }>("/notes", {
         folderId: currentfolderid,
         title: newNoteTitle,
         content: newNoteContent,
@@ -50,11 +52,13 @@ export const ContentView = ({
       // if (savedNote) {
       //   setCurrentNote(savedNote);
       // }
-      if (response.data) {
+      console.log("response after saving", response.data.id);
+
+      if (response.data.id) {
         toast.success("saved Successfully please refresh the page to see");
       }
       setNewNoteClicked(false);
-      console.log("Note saved successfully:", response.data);
+      console.log("Note saved successfully:", response);
     } catch (error) {
       console.error("Error saving note:", error);
     }

@@ -14,9 +14,11 @@ export const Restore = ({ note, setCurrentNote }: RestoreProps) => {
   const onClickRestore = async () => {
     try {
       setLoading(true);
-      const response = await AxiosApi.post(`/notes/${note.id}/restore`);
+      const response = await AxiosApi.post<string>(`/notes/${note.id}/restore`);
       console.log(response.data);
-      const currentNote = await AxiosApi.get(`/notes/${note.id}`);
+      const currentNote = await AxiosApi.get<{
+        note: Note;
+      }>(`/notes/${note.id}`);
       setCurrentNote(currentNote.data.note);
       console.log(currentNote);
     } catch (error) {
