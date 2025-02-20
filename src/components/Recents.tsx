@@ -20,7 +20,9 @@ export const Recents = () => {
   useEffect(() => {
     const fetchRecents = async () => {
       try {
-        const response = await AxiosApi.get("/notes/recent");
+        const response = await AxiosApi.get<{
+          recentNotes: notesRecent[];
+        }>("/notes/recent");
         setRecents(response.data.recentNotes);
       } catch (error) {
         console.log(error);

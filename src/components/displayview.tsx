@@ -20,7 +20,7 @@ const Displayview = ({
 }: DisplayviewProps) => {
   const [loading, setLoading] = useState(false);
 
-  const [note, setNote] = useState();
+  const [note, setNote] = useState<Note>();
 
   const { noteID } = useParams();
 
@@ -37,7 +37,9 @@ const Displayview = ({
           noteID
         ) {
           setLoading(true);
-          const response = await AxiosApi.get(`/notes/${noteID}`);
+          const response = await AxiosApi.get<{
+            note: Note;
+          }>(`/notes/${noteID}`);
           setNote(response.data.note);
         }
       } catch (error) {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { foldermodel } from "./foldermodel";
 import { AxiosApi } from "./ApiBaseUrl";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { RotateLoader } from "react-spinners";
 
 type eventPosition = {
@@ -25,20 +25,25 @@ export const Folders = ({ handleSetCurrentFolder }: seTfolderprops) => {
 
   const navigate = useNavigate();
   const { folderId } = useParams();
-  const location = useLocation();
+
   useEffect(() => {
     const fetchRecents = async () => {
       try {
-        const response = await AxiosApi.get("/folders");
+        const response = await AxiosApi.get<{
+          folders: foldermodel[];
+        }>("/folders");
+
         setFolders(response.data.folders);
-        if (!selectedFolder && response.data.folders.length > 0) {
-          setSelectedFolder(response.data.folders[0].id);
-        }
-        // ✅ Only navigate if no folder is selected in the URL
-        if (!folderId && !location.search.includes("folderName")) {
-          navigate(
-            `/folders/${response.data.folders[0].id}/${response.data.folders[0].name}`
-          );
+
+        if (response.data.folders.length > 0) {
+          if (!folderId) {
+            navigate(
+              `/folders/${response.data.folders[0].id}/${response.data.folders[0].name}`
+            );
+            setSelectedFolder(response.data.folders[0].id);
+          } else {
+            setSelectedFolder(folderId);
+          }
         }
       } catch (error) {
         console.log(error);
@@ -48,7 +53,7 @@ export const Folders = ({ handleSetCurrentFolder }: seTfolderprops) => {
     };
 
     fetchRecents();
-  }, [folderId, location.search, navigate, selectedFolder]); // ✅ Added dependencies
+  }, [folderId, navigate]);
 
   const onclickNavigate = (id: string, name: string) => {
     navigate(`/folders/${id}/${name}`);
@@ -59,7 +64,9 @@ export const Folders = ({ handleSetCurrentFolder }: seTfolderprops) => {
       const newFolder = { name: "New Folder" };
       await AxiosApi.post("/folders", newFolder);
 
-      const response = await AxiosApi.get("/folders");
+      const response = await AxiosApi.get<{
+        folders: foldermodel[];
+      }>("/folders");
 
       setFolders(response.data.folders);
       handleSetCurrentFolder(folderList[0].id, folderList[0].name);
@@ -105,7 +112,9 @@ export const Folders = ({ handleSetCurrentFolder }: seTfolderprops) => {
           name: editedFolderName, // Send the updated folder name
         });
 
-        const response = await AxiosApi.get("/folders");
+        const response = await AxiosApi.get<{
+          folders: foldermodel[];
+        }>("/folders");
         setFolders(response.data.folders);
 
         setIsEditing(false); // Exit edit mode after saving
@@ -127,7 +136,9 @@ export const Folders = ({ handleSetCurrentFolder }: seTfolderprops) => {
     try {
       await AxiosApi.delete(`folders/${position?.folderId}`);
 
-      const response = await AxiosApi.get("/folders");
+      const response = await AxiosApi.get<{
+        folders: foldermodel[];
+      }>("/folders");
       setFolders(response.data.folders);
     } catch (error) {
       console.log("error in deleting", error);

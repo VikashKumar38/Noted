@@ -19,7 +19,7 @@ const FolderView = () => {
 
   const queryParams = new URLSearchParams(location.search);
   const MoreOptionName = queryParams.get("folderName");
-  console.log("More" + MoreOptionName);
+
 
   const limit = 10;
   const searchQuery = queryParams.get("search") || "";
