@@ -50,7 +50,7 @@ const Displayview = ({
   }, [noteID, path.pathname]);
 
   return (
-    <div className="w-[60%] h-dvh bg-[#181818]">
+    <div className="w-[60%] h-[100vh] bg-[#181818]">
       {loading && (
         <div className="flex items-center h-full justify-center">
           <RotateLoader color="gray" size={20} />

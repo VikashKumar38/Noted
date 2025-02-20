@@ -5,7 +5,6 @@ import { Note } from "./components/maincomponent";
 import { AxiosApi } from "./ApiBaseUrl";
 import { RotateLoader } from "react-spinners";
 import { toast } from "react-toastify";
-// import { useParams } from "react-router-dom";
 
 type Position = {
   positionX: number;
@@ -23,6 +22,8 @@ export const ContentView = ({
   const [currentNote, setCurrentNote] = useState<Note | null>(note ?? null);
   const [newNoteContent, setNewNoteContent] = useState<string>("");
   const [newNoteTitle, setNewNoteTitle] = useState<string>("");
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [isEditingContent, setIsEditingContent] = useState(false);
 
   useEffect(() => {
     if (note) {
@@ -40,17 +41,17 @@ export const ContentView = ({
         isArchived: false,
       });
       // const latestNotesResponse = await AxiosApi.get("/notes", {
-      //   params: { folderId: currentfolderid },
+      //   params: { folderId: currentfolderid, search: "" },
       // });
 
-      // const savedNote = latestNotesResponse.data?.notes;
+      // const savedNote = latestNotesResponse.data?.notes[0];
       // console.log("newly created :- " + savedNote);
 
       // if (savedNote) {
       //   setCurrentNote(savedNote);
       // }
       if (response.data) {
-        toast.success("saved Successfully");
+        toast.success("saved Successfully please refresh the page to see");
       }
       setNewNoteClicked(false);
       console.log("Note saved successfully:", response.data);
@@ -88,12 +89,84 @@ export const ContentView = ({
     }
   };
 
+  const onClickEditTitle = () => {
+    setIsEditingTitle(true);
+    setNewNoteTitle(currentNote!.title);
+  };
+
+  const SaveEditedTitle = async () => {
+    try {
+      const response = await AxiosApi.patch(`notes/${currentNote!.id}`, {
+        folderId: currentNote?.folderId,
+        title: newNoteTitle,
+        content: currentNote?.content,
+        isFavorite: false,
+        isArchived: false,
+      });
+      if (response.data) {
+        toast.success("saved ");
+        setIsEditingTitle(false);
+        const updatedNoteResponse = await AxiosApi.get(
+          `/notes/${currentNote!.id}`
+        );
+        if (updatedNoteResponse.data.note) {
+          setCurrentNote(updatedNoteResponse.data.note);
+        }
+      }
+    } catch (error) {
+      console.log("error in saving title", error);
+      toast.error("failed to save");
+    }
+  };
+  const SaveOnKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") SaveEditedTitle();
+  };
+
+  const SaveContentOnKeyDown = (e: React.KeyboardEvent) => {
+    if (e.ctrlKey && e.key === "s") {
+      e.preventDefault();
+      saveEditedContent();
+    }
+  };
+
+  const saveEditedContent = async () => {
+    try {
+      const response = await AxiosApi.patch(`notes/${currentNote!.id}`, {
+        folderId: currentNote?.folderId,
+        title: currentNote?.title,
+        content: newNoteContent,
+        isFavorite: false,
+        isArchived: false,
+      });
+      if (response.data) {
+        toast.success("saved ");
+        setIsEditingContent(false);
+        const updatedNoteResponse = await AxiosApi.get(
+          `/notes/${currentNote!.id}`
+        );
+        if (updatedNoteResponse.data.note) {
+          setCurrentNote(updatedNoteResponse.data.note);
+        }
+      }
+    } catch (error) {
+      console.log("error in saving title", error);
+      toast.error("failed to save");
+    }
+  };
+  const onClickEditContent = () => {
+    setIsEditingContent(true);
+    setNewNoteContent(currentNote!.content);
+  };
+
   const onClickArchive = async () => {
     if (!currentNote || !currentNote.id) {
       console.log("No note selected to archive");
       return;
     }
-
+    if (currentNote.isFavorite) {
+      toast.info("it can be archived as this is marked as fav");
+      return;
+    }
     setLoading(true);
 
     try {
@@ -119,6 +192,10 @@ export const ContentView = ({
   const AddToFav = async () => {
     if (!currentNote || !currentNote.id) {
       console.log("No note selected to add to favorites");
+      return;
+    }
+    if (currentNote.isArchived) {
+      toast.info("this can not be marked as fav as it is already archived");
       return;
     }
     setLoading(true);
@@ -158,7 +235,7 @@ export const ContentView = ({
         <textarea
           className="w-full h-auto bg-transparent outline-none mt-4 text-lg "
           placeholder="Start typing..."
-          rows={30}
+          rows={26}
           value={newNoteContent}
           onChange={(e) => setNewNoteContent(e.target.value)}
         ></textarea>
@@ -181,8 +258,8 @@ export const ContentView = ({
   }
 
   return (
-    <div className="flex flex-col">
-      <div className="flex flex-col gap-y-6 pl-10 pt-12 pr-12">
+    <div className="flex flex-col h-full">
+      <div className="flex flex-col gap-y-6 pl-10 pt-12 pr-12 h-full">
         {loading ? (
           <div className="flex items-center h-full justify-center">
             <RotateLoader color="gray" size={20} />
@@ -190,7 +267,20 @@ export const ContentView = ({
         ) : !currentNote?.deletedAt ? (
           <>
             <div className="flex text-4xl text-white justify-between items-center">
-              <div>{currentNote!.title}</div>
+              {isEditingTitle ? (
+                <div>
+                  <input
+                    type="text"
+                    className="text-xl bg-transparent border-b border-gray-500 outline-none w-full"
+                    placeholder="Untitled Note"
+                    value={newNoteTitle}
+                    onChange={(e) => setNewNoteTitle(e.target.value)}
+                    onKeyDown={SaveOnKeyDown}
+                  />
+                </div>
+              ) : (
+                <div onDoubleClick={onClickEditTitle}>{currentNote!.title}</div>
+              )}
               <img
                 onClick={(e) =>
                   setPosition({ positionX: e.pageX, positionY: e.pageY })
@@ -224,11 +314,29 @@ export const ContentView = ({
             </div>
 
             <div
-              className="text-[#FFFFFF] text-md max-h-[900px] overflow-y-scroll overflow-x-hidden  [&::-webkit-scrollbar]:w-2
+              onDoubleClick={onClickEditContent}
+              className="h-full text-[#FFFFFF] text-md max-h-[900px] overflow-y-scroll overflow-x-hidden  [&::-webkit-scrollbar]:w-2
   dark:[&::-webkit-scrollbar-track]:bg-gray-400 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full
   dark:[&::-webkit-scrollbar-thumb]:bg-gray-500"
             >
-              {currentNote!.content}
+              {isEditingContent ? (
+                <>
+                  <textarea
+                    className="w-full h-auto bg-transparent outline-none mt-4 text-lg grow"
+                    rows={26}
+                    value={newNoteContent}
+                    onChange={(e) => setNewNoteContent(e.target.value)}
+                    onKeyDown={SaveContentOnKeyDown}
+                  ></textarea>
+                </>
+              ) : (
+                <div
+                  className="h-full
+                 grow"
+                >
+                  {currentNote!.content}
+                </div>
+              )}
             </div>
           </>
         ) : (

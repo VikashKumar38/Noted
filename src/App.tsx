@@ -4,7 +4,7 @@ import { ToastContainer } from "react-toastify";
 function App() {
   return (
     <>
-      <MainComponent />;
+      <MainComponent />
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -17,7 +17,6 @@ function App() {
         pauseOnHover
         theme="dark"
       />
-      ;
     </>
   );
 }
