@@ -59,7 +59,7 @@ const SideBar = ({
         {!isSearchedClicked ? (
           <img
             onClick={onclickHandler}
-            className="w-[88%] cursor-pointer"
+            className="w-[88%] cursor-pointer "
             src="/src/assets/NewNote.svg"
             alt="newNote"
           />
@@ -67,7 +67,7 @@ const SideBar = ({
           <div className="w-full flex items-center justify-center">
             <input
               type="text"
-              className=" bg-[#FFFFFF0D] w-[80%] pt-2 pb-2 pl-2 items-center justify-center rounded-md outline-none"
+              className=" bg-[#FFFFFF0D] w-[80%] pt-2 pb-2 pl-2 items-center justify-center rounded-md outline-none text-white"
               placeholder="search note"
               value={searchValue ?? ""}
               onChange={onChangeSearch}

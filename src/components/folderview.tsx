@@ -7,7 +7,7 @@ import { RotateLoader } from "react-spinners";
 
 const FolderView = () => {
   const [notesView, setNotesView] = useState<notesRecent[]>([]);
-  const [currentPage, setCurrentPage] = useState<number>(1);
+  // const [currentPage, setCurrentPage] = useState<number>(initialPage);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [debounceValue, setDebounceValue] = useState("");
   const [loading, setLoading] = useState(false);
@@ -20,9 +20,17 @@ const FolderView = () => {
   const queryParams = new URLSearchParams(location.search);
   const MoreOptionName = queryParams.get("folderName");
 
-
   const limit = 10;
   const searchQuery = queryParams.get("search") || "";
+
+  const initialPage = parseInt(queryParams.get("p@#a@(4g)(e") || "1", 10);
+  const [currentPage, setCurrentPage] = useState<number>(initialPage);
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set("p@#a@(4g)(e", currentPage.toString());
+    navigate(`${location.pathname}?${searchParams.toString()}`, {});
+  }, [currentPage]);
 
   useEffect(() => {
     const interval = setTimeout(() => {
@@ -73,7 +81,7 @@ const FolderView = () => {
     navigate({
       pathname: !location.pathname.includes("more")
         ? `recents/${folderid}/${foldername}/${id}`
-        : `more/extranotes/${id}`,
+        : `more/${MoreOptionName}/${id}`,
       search: searchParams.toString(),
     });
   };
@@ -133,7 +141,7 @@ const FolderView = () => {
             <button
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="bg-gray-700 text-white px-3 py-1 rounded disabled:opacity-50"
+              className="bg-gray-700 text-white px-3 py-1 rounded disabled:opacity-50 cursor-pointer"
             >
               Previous
             </button>
@@ -145,7 +153,7 @@ const FolderView = () => {
                 setCurrentPage((prev) => Math.min(prev + 1, totalPages))
               }
               disabled={currentPage === totalPages}
-              className="bg-gray-700 text-white px-3 py-1 rounded disabled:opacity-50"
+              className="bg-gray-700 text-white px-3 py-1 rounded disabled:opacity-50 cursor-pointer"
             >
               Next
             </button>

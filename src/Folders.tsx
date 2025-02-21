@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { foldermodel } from "./foldermodel";
 import { AxiosApi } from "./ApiBaseUrl";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { RotateLoader } from "react-spinners";
 
 type eventPosition = {
@@ -25,6 +25,7 @@ export const Folders = ({ handleSetCurrentFolder }: seTfolderprops) => {
 
   const navigate = useNavigate();
   const { folderId } = useParams();
+  const { pathname } = useLocation();
 
   useEffect(() => {
     const fetchRecents = async () => {
@@ -36,12 +37,12 @@ export const Folders = ({ handleSetCurrentFolder }: seTfolderprops) => {
         setFolders(response.data.folders);
 
         if (response.data.folders.length > 0) {
-          if (!folderId) {
+          if (!folderId && pathname === "/") {
             navigate(
               `/folders/${response.data.folders[0].id}/${response.data.folders[0].name}`
             );
             setSelectedFolder(response.data.folders[0].id);
-          } else {
+          } else if (folderId) {
             setSelectedFolder(folderId);
           }
         }
@@ -53,7 +54,7 @@ export const Folders = ({ handleSetCurrentFolder }: seTfolderprops) => {
     };
 
     fetchRecents();
-  }, [folderId, navigate]);
+  }, []);
 
   const onclickNavigate = (id: string, name: string) => {
     navigate(`/folders/${id}/${name}`);
@@ -88,8 +89,6 @@ export const Folders = ({ handleSetCurrentFolder }: seTfolderprops) => {
         folderName: name,
       });
     else if (e.button === 0) {
-      console.log("idddd", id);
-
       setSelectedFolder(id);
       handleSetCurrentFolder(id, name);
     }
@@ -101,15 +100,15 @@ export const Folders = ({ handleSetCurrentFolder }: seTfolderprops) => {
 
   const OnClickEdit = (id: string, name: string) => {
     setIsEditing(true);
-    setFolderName(name); // Set the folder name to be edited
-    setEditedFolderId(id); // Track which folder is being edited
+    setFolderName(name);
+    setEditedFolderId(id);
   };
 
   const onSaveEdit = async () => {
     if (editedFolderId && editedFolderName) {
       try {
         await AxiosApi.patch(`/folders/${editedFolderId}`, {
-          name: editedFolderName, // Send the updated folder name
+          name: editedFolderName,
         });
 
         const response = await AxiosApi.get<{
@@ -117,9 +116,9 @@ export const Folders = ({ handleSetCurrentFolder }: seTfolderprops) => {
         }>("/folders");
         setFolders(response.data.folders);
 
-        setIsEditing(false); // Exit edit mode after saving
-        setPosition(null); // Close the context menu
-        setEditedFolderId(null); // Clear the edited folder ID
+        setIsEditing(false);
+        setPosition(null);
+        setEditedFolderId(null);
       } catch (error) {
         console.error("Error updating folder", error);
       }
@@ -128,7 +127,7 @@ export const Folders = ({ handleSetCurrentFolder }: seTfolderprops) => {
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
-      onSaveEdit(); // Call save when Enter is pressed
+      onSaveEdit();
     }
   };
 
