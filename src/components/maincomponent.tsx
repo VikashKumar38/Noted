@@ -64,7 +64,7 @@ const MainComponent = () => {
           element={<Folders handleSetCurrentFolder={handleSetCurrentFolder} />}
         ></Route>
 
-        <Route path="more/extranotes?/:noteID?" element={<More />} />
+        <Route path="more/:MoreOptionName?/:noteID?" element={<More />} />
       </Route>
     </Routes>
   );

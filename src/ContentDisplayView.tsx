@@ -42,17 +42,11 @@ export const ContentView = ({
         isFavorite: false,
         isArchived: false,
       });
-      // const latestNotesResponse = await AxiosApi.get("/notes", {
-      //   params: { folderId: currentfolderid, search: "" },
-      // });
 
-      // const savedNote = latestNotesResponse.data?.notes[0];
-      // console.log("newly created :- " + savedNote);
-
-      // if (savedNote) {
-      //   setCurrentNote(savedNote);
-      // }
-      console.log("response after saving", response.data.id);
+      const Latestnotee = await AxiosApi.get(`/notes/${response.data.id}`);
+      if (Latestnotee.data.note) {
+        setCurrentNote(Latestnotee.data.note);
+      }
 
       if (response.data.id) {
         toast.success("saved Successfully please refresh the page to see");
