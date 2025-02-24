@@ -58,7 +58,7 @@ export const Recents = () => {
               handleRecentClick(item.id, item.folder.id, item.folder.name)
             }
             key={item.id}
-            className="flex gap-x-3 gap-y-3"
+            className="flex gap-x-3 gap-y-3 hover:shadow-lg hover:shadow-white"
           >
             <img
               src="/src/assets/nonSelected-recent.svg"

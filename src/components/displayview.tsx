@@ -24,7 +24,6 @@ const Displayview = ({
 
   const { noteID } = useParams();
 
-  console.log("noteid", noteID);
 
   const path = useLocation();
 

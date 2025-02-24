@@ -10,13 +10,13 @@ export const More = () => {
   return (
     <div className="flex flex-col gap-2.5">
       <h5 className="pl-2.5 text-sm text-[#FFFFFF99] cursor-pointer">More</h5>
-      <div className="flex flex-col gap-y-3">
+      <div className="flex flex-col gap-y-3 ">
         <div
           onClick={() => {
             // setSelectedMoreOption("favorites");
             navigate(`more?folderName=favorites`);
           }}
-          className="flex gap-x-3 pl-2.5 cursor-pointer "
+          className="flex gap-x-3 pl-2.5 cursor-pointer hover:shadow-lg hover:shadow-white"
         >
           <img src="/src/assets/star-icon.svg" alt="star-icon" />
           <span className="text-[#FFFFFF99] cursor-pointer">Favorites</span>
@@ -26,7 +26,7 @@ export const More = () => {
             // setSelectedMoreOption("trash");
             navigate(`more?folderName=trash`);
           }}
-          className="flex gap-x-3 pl-3 cursor-pointer"
+          className="flex gap-x-3 pl-3 cursor-pointer hover:shadow-lg hover:shadow-white"
         >
           <img
             className="cursor-pointer "
@@ -40,7 +40,7 @@ export const More = () => {
             // setSelectedMoreOption("archived");
             navigate(`more?folderName=archived`);
           }}
-          className="flex gap-x-3 pl-2.5 cursor-pointer"
+          className="flex gap-x-3 pl-2.5 cursor-pointer hover:shadow-lg hover:shadow-white"
         >
           <img
             className="cursor-pointer "

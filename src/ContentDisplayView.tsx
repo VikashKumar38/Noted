@@ -5,6 +5,7 @@ import { Note } from "./components/maincomponent";
 import { AxiosApi } from "./ApiBaseUrl";
 import { RotateLoader } from "react-spinners";
 import { toast } from "react-toastify";
+import { foldermodel } from "./foldermodel";
 
 type Position = {
   positionX: number;
@@ -24,6 +25,9 @@ export const ContentView = ({
   const [newNoteTitle, setNewNoteTitle] = useState<string>("");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [isEditingContent, setIsEditingContent] = useState(false);
+  const [isFolderEdit, setIsFolderEdit] = useState<boolean>(false);
+
+  const [folders, setFolders] = useState<foldermodel[]>([]);
 
   useEffect(() => {
     if (note) {
@@ -45,7 +49,10 @@ export const ContentView = ({
 
       const Latestnotee = await AxiosApi.get(`/notes/${response.data.id}`);
       if (Latestnotee.data.note) {
+        console.log(Latestnotee.data.note);
+
         setCurrentNote(Latestnotee.data.note);
+        console.log("current note ", currentNote);
       }
 
       if (response.data.id) {
@@ -215,6 +222,41 @@ export const ContentView = ({
     }
   };
 
+  const onClickAvailableFolders = async () => {
+    setIsFolderEdit(true);
+    try {
+      const response = await AxiosApi.get<{
+        folders: foldermodel[];
+      }>("/folders");
+
+      if (response.data.folders) {
+        setFolders(response.data.folders);
+      }
+    } catch (error) {
+      console.log("error in fetching the folders", error);
+    }
+  };
+
+  const handleSelect = async (id: string) => {
+    try {
+      const response = await AxiosApi.patch(`/notes/${currentNote!.id}`, {
+        folderId: id,
+      });
+      if (response.data) {
+        toast.success("folder changed successfully");
+        setIsFolderEdit(false);
+      }
+      const updatedNoteResponse = await AxiosApi.get(
+        `/notes/${currentNote!.id}`
+      );
+      if (updatedNoteResponse.data.note) {
+        setCurrentNote(updatedNoteResponse.data.note); // Trigger re-render
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   if (isNewNoteClicked) {
     return (
       <div className="flex flex-col w-full p-6 text-white">
@@ -306,9 +348,30 @@ export const ContentView = ({
                 <img src="/src/assets/folder-icon.svg" alt="folder" />
                 <span className="text-sm text-[#FFFFFF99]">Folder</span>
               </div>
-              <span className="text-sm underline text-[#FFFFFF] cursor-pointer">
-                {currentNote?.folder?.name || "No folder"}
-              </span>
+              <div className="relative ">
+                <span
+                  onClick={onClickAvailableFolders}
+                  className="text-sm underline text-[#FFFFFF] cursor-pointer"
+                >
+                  {currentNote!.folder?.name || "No folder"}
+                </span>
+                {isFolderEdit && (
+                  <ul
+                    className="absolute  rounded-lg shadow-lg z-1 bg-gray-600"
+                    onMouseLeave={() => setIsFolderEdit(false)}
+                  >
+                    {folders.map((option) => (
+                      <li
+                        key={option.id}
+                        onClick={() => handleSelect(option.id)}
+                        className="px-4 py-2 hover:bg-gray-200 cursor-pointer rounded-lg "
+                      >
+                        {option.name}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             </div>
 
             <div
@@ -330,7 +393,7 @@ export const ContentView = ({
               ) : (
                 <div
                   className="h-full
-                 grow"
+                 grow "
                 >
                   {currentNote!.content}
                 </div>
@@ -338,7 +401,7 @@ export const ContentView = ({
             </div>
           </>
         ) : (
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center ">
             <Restore note={currentNote} setCurrentNote={setCurrentNote} />
           </div>
         )}

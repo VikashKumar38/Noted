@@ -46,7 +46,7 @@ export const Restore = ({ note, setCurrentNote }: RestoreProps) => {
             </p>
             <button
               onClick={onClickRestore}
-              className="bg-[#312EB5] rounded-md pt-3 pb-3 pl-7 pr-7 cursor-pointer"
+              className="bg-[#312EB5] rounded-md pt-2.5 pb-2.5 pl-7 pr-7 cursor-pointer text-white"
             >
               Restore
             </button>

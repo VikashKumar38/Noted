@@ -33,6 +33,10 @@ const FolderView = () => {
   }, [currentPage]);
 
   useEffect(() => {
+    setCurrentPage(1);
+  }, [folderId]);
+
+  useEffect(() => {
     const interval = setTimeout(() => {
       setDebounceValue(searchQuery);
     }, 700);
@@ -120,9 +124,9 @@ const FolderView = () => {
                   onClick={() =>
                     onClickHandler(item.id, item.folder.id, item.folder.name)
                   }
-                  className="flex flex-col p-4 bg-[#FFFFFF08] cursor-pointer"
+                  className="flex flex-col p-4 bg-[#FFFFFF08] cursor-pointer hover:shadow-lg hover:shadow-white"
                 >
-                  <div className="flex flex-col gap-y-3">
+                  <div className="flex flex-col gap-y-3 ">
                     <p className="text-xl text-white">{item.title}</p>
                     <div className="flex justify-around">
                       <p className="text-[#FFFFFF99] text-sm">
